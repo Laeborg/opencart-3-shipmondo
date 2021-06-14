@@ -1,0 +1,253 @@
+<modification>
+	<name>Shipmondo</name>
+	<version>1.0</version>
+	<author>SharksMedia A/S</author>
+	<code>shipmondo</code>
+    
+    <file path="catalog/model/extension/total/shipping.php" error="skip">
+		<operation error="skip">
+			<search><![CDATA[$total['totals'][] = array(]]></search>
+			<add position="before"><![CDATA[
+                $parts = explode(' <div', $this->session->data['shipping_method']['title']);
+                $this->session->data['shipping_method']['title'] = trim($parts[0]);
+            ]]></add>
+		</operation>
+	</file>
+	
+	<file path="catalog/controller/extension/quickcheckout/shipping_method.php" error="skip">
+		<operation error="skip">
+			<search index="1"><![CDATA[$method_data[$result['code']] = array(]]></search>
+			<add position="before"><![CDATA[$quotes = [];
+			
+			foreach ($quote['quote'] as $key => $q) {
+				$parts = explode(' <div', $q['title']);
+				$title = trim($parts[0]);
+				
+				$quotes[$key] = [
+					'code' => $q['code'],
+					'title' => $title,
+					'cost' => $q['cost'],
+					'tax_class_id' => $q['tax_class_id'],
+					'text' => $q['test']
+				];
+			}]]></add>
+		</operation>
+		<operation error="skip">
+			<search index="1"><![CDATA['quote'      => $quote['quote'],]]></search>
+			<add position="replace"><![CDATA['quote'      => $quotes,]]></add>
+		</operation>
+	</file>
+    
+    <file path="catalog/controller/extension/quickcheckout/confirm.php">
+		<operation error="skip">
+			<search><![CDATA[$order_data['products'] = array();]]></search>
+			<add position="before"><![CDATA[
+                if(!empty($order_data['shipping_code']))
+    			{
+    				$method = explode('.', $order_data['shipping_code']);
+    				
+    				if($method[0] == 'shipmondo')
+    				{
+    					$pup_id = $this->session->data['pickup_point'];
+    					
+    					if(!empty($pup_id))
+    					{
+    						$product = $this->cache->get(strtolower('shipmondo.product.' . $method[1]));
+    						
+    						if(empty($carrier))
+    						{
+    							$shipmondo = new Shipmondo($this->config->get('shipping_shipmondo_api_user'), $this->config->get('shipping_shipmondo_api_key'));
+    				            
+    				            $products = $shipmondo->getProducts([
+    				                'product_code' => $method[1]
+    				            ]);
+    				            
+    				            if(!empty($products['output']))
+    				            {
+    				                foreach($products['output'] as $product)
+    				                {
+    				                    $product = $product;
+    				                }
+    				            }
+    				            
+    				            $this->cache->set(strtolower('shipmondo.product.' . $method[1]), $product);
+    				        }
+    						
+    						if(!empty($product['service_point_available']))
+    						{
+    							$carrier = $product['carrier']['code'];
+    							$pickup_point = $this->cache->get(strtolower('shipmondo.pup.' . $carrier . '.' . $pup_id));
+    							
+    							if(empty($pickup_point))
+    					        {
+    					            $shipmondo = new Shipmondo($this->config->get('shipping_shipmondo_api_user'), $this->config->get('shipping_shipmondo_api_key'));
+    					            
+    					            $pups = $shipmondo->getPickupPoints([
+    					                'carrier_code' => $carrier,
+    					                'country_code' => $this->session->data['shipping_address']['iso_code_2'],
+    					                'id' => $pup_id
+    					            ]);
+    					            
+    					            $pickup_point = [];
+    					            
+    					            if(!empty($pups['output']))
+    					            {
+    					                foreach($pups['output'] as $pup)
+    					                {
+    					                    $pickup_point = $pup;
+    					                }
+    					            }
+    					            
+    					            $this->cache->set(strtolower('shipmondo.pup.' . $carrier . '.' . $pup_id), $pickup_point);
+    					        }
+    							
+    							if(!empty($pickup_point))
+    					        {
+    								$order_data['shipping_company'] = $pickup_point['company_name'];
+    								$order_data['shipping_address_1'] = $pickup_point['address'];
+    								$order_data['shipping_address_2'] = $pickup_point['address2'];
+    								$order_data['shipping_city'] = $pickup_point['city'];
+    								$order_data['shipping_postcode'] = $pickup_point['zipcode'];
+    								$order_data['shipping_zone_id'] = $pickup_point['id'];
+    							}
+    						}
+    					}
+    				}
+    			}
+            ]]></add>
+		</operation>
+	</file>
+	
+	<file path="admin/view/template/sale/order_info.twig" error="skip">
+		<operation error="skip">
+			<search><![CDATA[<label class="col-sm-2 control-label" for="input-notify">{{ entry_notify }}</label>]]></search>
+			<add position="before" offset="1"><![CDATA[<div class="form-group">
+			  <label class="col-sm-2 control-label" for="input-shipmondo"><span data-toggle="tooltip" title="{{ help_shipmondo }}">{{ entry_shipmondo }}</span></label>
+			  <div class="col-sm-10">
+				<div class="checkbox">
+				  <input type="checkbox" name="shipmondo" value="1" id="input-shipmondo"/>
+				</div>
+			  </div>
+			</div>]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[&notify=' + ($('input[name=\'notify\']').prop('checked') ? 1 : 0) + ']]></search>
+			<add position="replace"><![CDATA[&notify=' + ($('input[name=\'notify\']').prop('checked') ? 1 : 0) + '&shipmondo=' + ($('input[name=\'shipmondo\']').prop('checked') ? 1 : 0) + ']]></add>
+		</operation>
+	</file>
+	
+	<file path="admin/controller/sale/order.php" error="skip">
+		<operation error="skip">
+			<search><![CDATA[$this->load->language('sale/order');]]></search>
+			<add position="before"><![CDATA[$this->load->language('extension/shipping/shipmondo');]]></add>
+		</operation>
+	</file>
+	
+	<file path="catalog/controller/api/order.php" error="skip">
+		<operation error="skip">
+			<search><![CDATA[$this->model_checkout_order->addOrderHistory($order_id, $this->request->post['order_status_id'], $this->request->post['comment'], $this->request->post['notify'], $this->request->post['override']);]]></search>
+			<add position="replace"><![CDATA[if ($this->request->post['shipmondo']) {
+			    try {
+			        $this->load->model('localisation/country');
+			        $this->load->model('extension/shipping/shipmondo');
+			        
+			        $this->load->language('extension/shipping/shipmondo');
+			        
+			        $country_info = $this->model_localisation_country->getCountry($order_info['shipping_country_id']);
+			        
+			        $methods = $this->model_extension_shipping_shipmondo->getMethods($country_info['iso_code_2']);
+			        $shipping_method = false;
+			        
+			        foreach ($methods as $method) {
+			            foreach ($method['products'] as $product) {
+			                if ($product['code'] == strtoupper(str_replace('shipmondo.', '', $order_info['shipping_code']))) {
+			                    $shipping_method = $product;
+			                    
+			                    break;
+			                }
+			            }
+			        }
+			        
+			        if ($shipping_method) {
+			            $address = explode(', ', $this->config->get('config_address'));
+			            
+			            $shipment_data = [
+			                "sender" => [
+			                    "name" => $this->config->get('config_name'),
+			                    "address1" => $address[0],
+			                    "address2" => count($address) > 2 ? $address[1] : '',
+			                    "zipcode" => explode(' ', end($address))[0],
+			                    "city" => explode(' ', end($address))[1],
+			                    "country_code" => $this->config->get('shipping_shipmondo_sender_country_code'),
+			                    "email" => $this->config->get('config_email'),
+			                    "telephone" => str_replace(' ', '', $this->config->get('config_telephone'))
+			                ],
+			                "receiver" => [
+			                    "name" => $order_info['shipping_company'] ? $order_info['shipping_company'] : $order_info['shipping_firstname'] . " " . $order_info['shipping_lastname'],
+			                    "attention" => $order_info['shipping_company'] ? $order_info['shipping_firstname'] . " " . $order_info['shipping_lastname'] : "",
+			                    "address1" => $order_info['shipping_address_1'],
+			                    "address2" => $order_info['shipping_address_2'],
+			                    "zipcode" => $order_info['shipping_postcode'],
+			                    "city" => $order_info['shipping_city'],
+			                    "country_code" => $country_info['iso_code_2'],
+			                    "email" => $order_info["email"],
+			                    "mobile" => $order_info["telephone"]
+			                ],
+			                "service_point" => [],
+			                "sms_notification" => true,
+			                "email_notification" => true,
+			                "order_id" => $order_info['order_id'],
+			                "reference" => sprintf($this->language->get('text_order'), $order_info['order_id']),
+			                "source" => $this->config->get('config_name'),
+			                "carrier_code" => $shipping_method['carrier']['code'],
+			                "product_code" => strtoupper(str_replace('shipmondo.', '', $order_info['shipping_code'])),
+			                "service_codes" => "EMAIL_NT,SMS_NT"
+			            ];
+			            
+			            if ($shipping_method['service_point_available']) {
+			                if ($order_info['shipping_zone_id']) {
+			                    $shipment_data['service_point'] = [
+			                        "id" => $order_info['shipping_zone_id'],
+			                        "name" => $order_info['shipping_company'],
+			                        "address1" => $order_info['shipping_address_1'],
+			                        "address2" => $order_info['shipping_address_2'],
+			                        "zipcode" => $order_info['shipping_postcode'],
+			                        "city" => $order_info['shipping_city'],
+			                        "country_code" => $country_info['iso_code_2']
+			                    ];
+			                    
+			                    $shipment_data["receiver"]["name"] = $order_info['payment_company'] ? $order_info['payment_company'] : $order_info['payment_firstname'] . " " . $order_info['payment_lastname'];
+			                    $shipment_data["receiver"]["attention"] = $order_info['payment_company'] ? $order_info['payment_firstname'] . " " . $order_info['payment_lastname'] : "";
+			                    $shipment_data["receiver"]["address1"] = $order_info['payment_address_1'];
+			                    $shipment_data["receiver"]["address2"] = $order_info['payment_address_2'];
+			                    $shipment_data["receiver"]["zipcode"] = $order_info['payment_postcode'];
+			                    $shipment_data["receiver"]["city"] = $order_info['payment_city'];
+			                    $shipment_data["receiver"]["country_code"] = $country_info['iso_code_2'];
+			                }
+			            }
+			            
+			            $shipmondo = new Shipmondo($this->config->get('shipping_shipmondo_api_user'), $this->config->get('shipping_shipmondo_api_key'));
+			            
+			            $shipment = $shipmondo->createImportedShipment($shipment_data);
+			            
+			            if ($shipment['output']) {
+			                $this->model_checkout_order->addOrderHistory($order_id, $this->request->post['order_status_id'], sprintf($this->language->get('text_created'), $shipment['output']['id']), 0, 1);
+			            }
+			        }
+			    } catch (Exception $e) {
+			        $json['error'] = 'Shipmondo: ' . $e->getMessage();
+			    }
+			}
+
+			if (empty($json)) {
+			    $this->model_checkout_order->addOrderHistory($order_id, $this->request->post['order_status_id'], $this->request->post['comment'], $this->request->post['notify'], $this->request->post['override']);
+
+			    $json['success'] = $this->language->get('text_success');
+			}]]></add>
+		</operation>
+		<operation error="skip">
+			<search index="5"><![CDATA[$json['success'] = $this->language->get('text_success');]]></search>
+			<add position="replace"><![CDATA[]]></add>
+		</operation>
+	</file>
+</modification>
