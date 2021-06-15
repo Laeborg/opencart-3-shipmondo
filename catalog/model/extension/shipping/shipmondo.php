@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
 class ModelExtensionShippingShipmondo extends Model
 {
     public function getQuote($address)
@@ -130,8 +126,7 @@ class ModelExtensionShippingShipmondo extends Model
                                                         var infowindow = new google.maps.InfoWindow();
                                                         
                                                         var markers = [];
-                                                        var iconBase = "";
-                                                        //var pickup_points = JSON.parse(\'[]\');
+                                                        var iconBase = "/image/shipping/shipmondo/";
                                                         var pickup_points = JSON.parse(\'' . json_encode($pickup_points) . '\');
                                                         
                                                         pickup_points.forEach(function(pickup_point, key) {
@@ -142,6 +137,7 @@ class ModelExtensionShippingShipmondo extends Model
                                                             var marker = new google.maps.Marker({
                                                                 position,
                                                                 map,
+                                                                icon: iconBase + "' . strtolower($method_info['carrier']['code']) . '.png",
                                                                 title: pickup_point.company_name
                                                             });
 
