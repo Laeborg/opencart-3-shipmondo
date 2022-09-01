@@ -15,6 +15,8 @@ $_['text_carrier']                     = '-- Select carrier --';
 $_['text_product']                     = '-- Select freight product --';
 $_['text_select_zone']                 = '-- Awaiting zone --';
 $_['text_select_carrier']              = '-- Awaiting carrier --';
+$_['text_draft']                       = 'Draft';
+$_['text_order']                       = 'Order';
 
 // Entry
 $_['entry_api_user']                   = 'API user';
@@ -24,6 +26,8 @@ $_['entry_sender_country_code']        = 'Sender Country Code';
 $_['entry_auto_print']                 = 'Auto-print';
 $_['entry_pickup_points']              = 'Show Pickup Points';
 $_['entry_google_api_key']             = 'Google API key';
+$_['entry_label_type']                 = 'Create Label as';
+$_['entry_own_agreement']              = 'Own Agreement';
 
 // Help
 $_['help_name']                        = 'Name is visible in checkout';

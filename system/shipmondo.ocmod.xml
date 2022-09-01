@@ -228,11 +228,38 @@
 			            
 			            $shipmondo = new Shipmondo($this->config->get('shipping_shipmondo_api_user'), $this->config->get('shipping_shipmondo_api_key'));
 			            
-			            $shipment = $shipmondo->createImportedShipment($shipment_data);
-			            
-			            if ($shipment['output']) {
-			                $this->model_checkout_order->addOrderHistory($order_id, $this->request->post['order_status_id'], sprintf($this->language->get('text_created'), $shipment['output']['id']), 0, 1);
-			            }
+						if ($this->config->get('shipping_shipmondo_label_type') == 'draft') {
+							$shipment = $shipmondo->createImportedShipment($shipment_data);
+
+							if ($shipment['output']) {
+								$this->model_checkout_order->addOrderHistory($order_id, $this->request->post['order_status_id'], sprintf($this->language->get('text_created'), $shipment['output']['id']), 0, 1);
+							}
+						} else if ($this->config->get('shipping_shipmondo_label_type') == 'order') {
+							$weight = 0;
+
+							$order_products = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)$order_info['order_id'] . "'")->rows;
+
+							foreach ($order_products as $order_product) {
+								$product_info = $this->db->query("SELECT * FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$order_product['product_id'] . "'")->row;
+
+								if ($product_info) {
+									$weight += $product_info['weight'] * $order_product['quantity'];
+								}
+							}
+
+							$shipment_data['own_agreement'] = (bool)$this->config->get('shipping_shipmondo_own_agreement');
+
+							$shipment_data['parcels'] = [[
+								'quantity' => 1,
+								'weight' => $weight > 1000 ? $weight : 1000
+							]];
+
+							$shipment = $shipmondo->createShipment($shipment_data);
+
+							if ($shipment['output']) {
+								$this->model_checkout_order->addOrderHistory($order_id, $this->request->post['order_status_id'], sprintf($this->language->get('text_tracking_number'), $shipment['output']['pkg_no']), 0, 1);
+							}
+						}
 			        }
 			    } catch (Exception $e) {
 			        $json['error'] = 'Shipmondo: ' . $e->getMessage();

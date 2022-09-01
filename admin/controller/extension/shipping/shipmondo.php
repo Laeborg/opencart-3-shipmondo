@@ -91,12 +91,20 @@ class ControllerExtensionShippingShipmondo extends Controller
 			$data['shipping_shipmondo_sender_country_code'] = false;
 		}
         
-        if (isset($this->request->post['shipping_shipmondo_auto_print'])) {
-			$data['shipping_shipmondo_auto_print'] = $this->request->post['shipping_shipmondo_auto_print'];
-		} elseif ($this->config->has('shipping_shipmondo_auto_print')) {
-			$data['shipping_shipmondo_auto_print'] = $this->config->get('shipping_shipmondo_auto_print');
+        if (isset($this->request->post['shipping_shipmondo_label_type'])) {
+			$data['shipping_shipmondo_label_type'] = $this->request->post['shipping_shipmondo_label_type'];
+		} elseif ($this->config->has('shipping_shipmondo_label_type')) {
+			$data['shipping_shipmondo_label_type'] = $this->config->get('shipping_shipmondo_label_type');
 		} else {
-			$data['shipping_shipmondo_auto_print'] = false;
+			$data['shipping_shipmondo_label_type'] = 'draft';
+		}
+
+        if (isset($this->request->post['shipping_shipmondo_own_agreement'])) {
+			$data['shipping_shipmondo_own_agreement'] = $this->request->post['shipping_shipmondo_own_agreement'];
+		} elseif ($this->config->has('shipping_shipmondo_own_agreement')) {
+			$data['shipping_shipmondo_own_agreement'] = $this->config->get('shipping_shipmondo_own_agreement');
+		} else {
+			$data['shipping_shipmondo_own_agreement'] = false;
 		}
         
         if (isset($this->request->post['shipping_shipmondo_pickup_points'])) {

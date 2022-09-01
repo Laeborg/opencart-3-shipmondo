@@ -15,6 +15,8 @@ $_['text_carrier']                     = '-- Vælg fragtfirma --';
 $_['text_product']                     = '-- Vælg forsendelsesprodukt --';
 $_['text_select_zone']                 = '-- Afventer zone --';
 $_['text_select_carrier']              = '-- Afventer fragtfirma --';
+$_['text_draft']                       = 'Kladde';
+$_['text_order']                       = 'Ordre';
 
 // Entry
 $_['entry_api_user']                   = 'API bruger';
@@ -25,6 +27,8 @@ $_['entry_auto_print']                 = 'Print automatisk';
 $_['entry_pickup_points']              = 'Visning af udleveringssteder';
 $_['entry_google_api_key']             = 'Google API nøgle';
 $_['entry_shipmondo']                  = 'Shipmondo';
+$_['entry_label_type']                 = 'Opret label som';
+$_['entry_own_agreement']              = 'Egen fragtaftale';
 
 // Help
 $_['help_name']                        = 'Navnet der vises i checkout for metoden.';
