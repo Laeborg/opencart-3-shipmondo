@@ -248,6 +248,10 @@
 							}
 
 							$shipment_data['own_agreement'] = (bool)$this->config->get('shipping_shipmondo_own_agreement');
+							
+							if ($this->config->get('shipping_shipmondo_auto_print')) {
+								$shipment_data['print'] = true;
+							}
 
 							$shipment_data['parcels'] = [[
 								'quantity' => 1,

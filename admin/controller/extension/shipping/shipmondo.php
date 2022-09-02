@@ -106,6 +106,14 @@ class ControllerExtensionShippingShipmondo extends Controller
 		} else {
 			$data['shipping_shipmondo_own_agreement'] = false;
 		}
+
+        if (isset($this->request->post['shipping_shipmondo_auto_print'])) {
+			$data['shipping_shipmondo_auto_print'] = $this->request->post['shipping_shipmondo_auto_print'];
+		} elseif ($this->config->has('shipping_shipmondo_auto_print')) {
+			$data['shipping_shipmondo_auto_print'] = $this->config->get('shipping_shipmondo_auto_print');
+		} else {
+			$data['shipping_shipmondo_auto_print'] = 0;
+		}
         
         if (isset($this->request->post['shipping_shipmondo_pickup_points'])) {
 			$data['shipping_shipmondo_pickup_points'] = $this->request->post['shipping_shipmondo_pickup_points'];

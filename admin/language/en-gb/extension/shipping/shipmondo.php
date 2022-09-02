@@ -28,11 +28,13 @@ $_['entry_pickup_points']              = 'Show Pickup Points';
 $_['entry_google_api_key']             = 'Google API key';
 $_['entry_label_type']                 = 'Create Label as';
 $_['entry_own_agreement']              = 'Own Agreement';
+$_['entry_auto_print']                 = 'Automatic print';
 
 // Help
 $_['help_name']                        = 'Name is visible in checkout';
 $_['help_weight']                      = 'Weight Limits as interval, eg. 1.000-5.000';
 $_['help_free_shipping']               = 'Amount for Free Shipping';
+$_['help_auto_print']                  = 'Does not apply to labels created as drafts.';
 
 // Columns
 $_['column_name']                      = 'Method';

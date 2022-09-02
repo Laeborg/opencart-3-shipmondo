@@ -16,7 +16,7 @@ $_['text_product']                     = '-- Vælg forsendelsesprodukt --';
 $_['text_select_zone']                 = '-- Afventer zone --';
 $_['text_select_carrier']              = '-- Afventer fragtfirma --';
 $_['text_draft']                       = 'Kladde';
-$_['text_order']                       = 'Ordre';
+$_['text_order']                       = 'Forsendelse';
 
 // Entry
 $_['entry_api_user']                   = 'API bruger';
@@ -29,12 +29,14 @@ $_['entry_google_api_key']             = 'Google API nøgle';
 $_['entry_shipmondo']                  = 'Shipmondo';
 $_['entry_label_type']                 = 'Opret label som';
 $_['entry_own_agreement']              = 'Egen fragtaftale';
+$_['entry_auto_print']                 = 'Automatisk udskrivning';
 
 // Help
 $_['help_name']                        = 'Navnet der vises i checkout for metoden.';
 $_['help_weight']                      = 'Hvis metoden er vægtbegrænses kan det angives i interval, fx.: 1.000-5.000';
 $_['help_free_shipping']               = 'Angiv beløbsgrænse for fri fragt.';
 $_['help_shipmondo']                   = 'Generér forsendelseslabel i Shipmondo';
+$_['help_auto_print']                  = 'Gælder ikke labels oprettet som kladder';
 
 // Columns
 $_['column_name']                      = 'Metodenavn';
